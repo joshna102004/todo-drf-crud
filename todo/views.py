@@ -1,42 +1,24 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-
-from . import controllers
+# todo/views.py
 from .models import Todo
-from .serializers.response import TodoResponseSerializer
+from .dataclasses import TodoData
 
+def list_todos():
+    return Todo.objects.all().order_by("-created_at")
 
-@api_view(["GET", "POST"])
-def todo_list_create(request):
-    if request.method == "GET":
-        qs = Todo.objects.all().order_by("-created_at")
-        return Response(TodoResponseSerializer(qs, many=True).data)
+def create_todo(todo_data: TodoData):
+    todo = Todo.objects.create(
+        title=todo_data.title,
+        description=todo_data.description,
+        is_completed=todo_data.is_completed
+    )
+    return todo
 
-    # FIXED: pass request.data
-    todo_dc = controllers.prepare_create(request.data)
+def update_todo(todo_instance, todo_data: TodoData):
+    todo_instance.title = todo_data.title
+    todo_instance.description = todo_data.description
+    todo_instance.is_completed = todo_data.is_completed
+    todo_instance.save()
+    return todo_instance
 
-    todo = Todo.create_from_dataclass(todo_dc)
-    return Response(TodoResponseSerializer(todo).data, status=status.HTTP_201_CREATED)
-
-
-@api_view(["GET", "PUT", "PATCH", "DELETE"])
-def todo_detail(request, pk):
-    todo = Todo.get_or_404(pk)
-
-    if request.method == "GET":
-        return Response(TodoResponseSerializer(todo).data)
-
-    if request.method == "DELETE":
-        todo.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    if request.method == "PUT":
-        update_dc = controllers.prepare_full_update(request.data)
-        updated = todo.apply_update_dataclass(update_dc)
-        return Response(TodoResponseSerializer(updated).data)
-
-    if request.method == "PATCH":
-        update_dc = controllers.prepare_partial_update(request.data)
-        updated = todo.apply_update_dataclass(update_dc)
-        return Response(TodoResponseSerializer(updated).data)
+def delete_todo(todo_instance):
+    todo_instance.delete()

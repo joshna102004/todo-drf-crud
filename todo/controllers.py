@@ -1,45 +1,44 @@
-from typing import List
-from .serializers import (
-    TodoCreateRequestSerializer,
-    TodoUpdateRequestSerializer,
-    TodoPartialUpdateRequestSerializer,
-)
-from .dataclasses import TodoData, TodoUpdateData
-from rest_framework.exceptions import ValidationError
+# todo/controllers.py
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
-# LIST / GET can remain simple helpers (no DB here by request)
-# For read operations the view will call model/query directly or you can add a helper that returns querysets.
+from .views import list_todos, create_todo, update_todo, delete_todo
+from .serializers.request_serializers import TodoRequestSerializer
+from .serializers.response_serializers import TodoResponseSerializer
+from .dataclasses import TodoData
+from .models import Todo
 
-def prepare_create(request_data: dict) -> TodoData:
-    """
-    Controller -> calls serializer to validate request data.
-    Returns a TodoData dataclass ready for the view to persist via model.
-    """
-    serializer = TodoCreateRequestSerializer(data=request_data)
-    serializer.is_valid(raise_exception=True)
-    v = serializer.validated_data
-    return TodoData(
-        title=v["title"],
-        description=v.get("description", ""),
-        is_completed=v.get("is_completed", False),
-    )
+@api_view(["GET", "POST"])
+def todo_controller(request):
+    if request.method == "GET":
+        todos = list_todos()
+        return Response(TodoResponseSerializer(todos, many=True).data)
 
-def prepare_full_update(request_data: dict) -> TodoUpdateData:
-    serializer = TodoUpdateRequestSerializer(data=request_data)
-    serializer.is_valid(raise_exception=True)
-    v = serializer.validated_data
-    return TodoUpdateData(
-        title=v["title"],
-        description=v.get("description", ""),
-        is_completed=v["is_completed"],
-    )
+    if request.method == "POST":
+        serializer = TodoRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            todo_data = TodoData(**serializer.validated_data)
+            todo = create_todo(todo_data)
+            return Response(TodoResponseSerializer(todo).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def prepare_partial_update(request_data: dict) -> TodoUpdateData:
-    serializer = TodoPartialUpdateRequestSerializer(data=request_data, partial=True)
-    serializer.is_valid(raise_exception=True)
-    v = serializer.validated_data
-    return TodoUpdateData(
-        title=v.get("title"),
-        description=v.get("description"),
-        is_completed=v.get("is_completed"),
-    )
+
+@api_view(["PUT", "DELETE"])
+def todo_detail_controller(request, pk):
+    try:
+        todo = Todo.objects.get(pk=pk)
+    except Todo.DoesNotExist:
+        return Response({"error": "Todo not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "PUT":
+        serializer = TodoRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            todo_data = TodoData(**serializer.validated_data)
+            updated_todo = update_todo(todo, todo_data)
+            return Response(TodoResponseSerializer(updated_todo).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == "DELETE":
+        delete_todo(todo)
+        return Response(status=status.HTTP_204_NO_CONTENT)

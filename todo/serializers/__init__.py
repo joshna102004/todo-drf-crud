@@ -1,19 +1,3 @@
-from .request import (
-    TodoCreateRequestSerializer,
-    TodoUpdateRequestSerializer,
-)
-from .partial_update import (
-    TodoPartialUpdateRequestSerializer,
-)
-from .response import (
-    TodoResponseSerializer,
-    TodoListResponseSerializer,
-)
-
-__all__ = [
-    "TodoCreateRequestSerializer",
-    "TodoUpdateRequestSerializer",
-    "TodoPartialUpdateRequestSerializer",
-    "TodoResponseSerializer",
-    "TodoListResponseSerializer",
-]
+# todo/serializers/__init__.py
+from .request_serializers import TodoRequestSerializer
+from .response_serializers import TodoResponseSerializer

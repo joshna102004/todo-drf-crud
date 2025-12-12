@@ -1,7 +1,8 @@
+# myproject/urls.py
 from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/", include("todo.urls")),  # <--- this is the entry point for our flow
+    path('admin/', admin.site.urls),
+    path('api/', include('todo.urls')),  # All todo URLs prefixed with /api/
 ]

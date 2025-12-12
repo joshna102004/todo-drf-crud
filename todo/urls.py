@@ -1,7 +1,8 @@
+# todo/urls.py
 from django.urls import path
-from . import views
+from .controllers import todo_controller, todo_detail_controller
 
 urlpatterns = [
-    path("todos/", views.todo_list_create, name="todo-list-create"),
-    path("todos/<int:pk>/", views.todo_detail, name="todo-detail"),
+    path("todos/", todo_controller, name="todo_list_create"),
+    path("todos/<int:pk>/", todo_detail_controller, name="todo_detail"),
 ]

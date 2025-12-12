@@ -1,0 +1,8 @@
+# todo/serializers/response_serializers.py
+from rest_framework import serializers
+from ..models import Todo
+
+class TodoResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ["id", "title", "description", "is_completed", "created_at"]
