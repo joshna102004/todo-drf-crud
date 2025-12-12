@@ -1,69 +1,42 @@
-from dataclasses import asdict
-
-from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
 from . import controllers
-from .dataclasses import TodoData, TodoUpdateData
-from .serializers import TodoSerializer
+from .models import Todo
+from .serializers.response import TodoResponseSerializer
 
 
-class TodoListCreateView(APIView):
-    """
-    GET  /api/todos/      -> list all todos
-    POST /api/todos/      -> create new todo
-    """
+@api_view(["GET", "POST"])
+def todo_list_create(request):
+    if request.method == "GET":
+        qs = Todo.objects.all().order_by("-created_at")
+        return Response(TodoResponseSerializer(qs, many=True).data)
 
-    def get(self, request):
-        todos = controllers.list_todos()
-        serializer = TodoSerializer(todos, many=True)
-        return Response(serializer.data)
+    # FIXED: pass request.data
+    todo_dc = controllers.prepare_create(request.data)
 
-    def post(self, request):
-        serializer = TodoSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        # Convert validated data into dataclass, call controller
-        data = TodoData(**serializer.validated_data)
-        todo = controllers.create_todo(data)
-        out_serializer = TodoSerializer(todo)
-        return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+    todo = Todo.create_from_dataclass(todo_dc)
+    return Response(TodoResponseSerializer(todo).data, status=status.HTTP_201_CREATED)
 
 
-class TodoDetailView(APIView):
-    """
-    GET    /api/todos/<id>/   -> retrieve one
-    PUT    /api/todos/<id>/   -> full update
-    PATCH  /api/todos/<id>/   -> partial update
-    DELETE /api/todos/<id>/   -> delete
-    """
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+def todo_detail(request, pk):
+    todo = Todo.get_or_404(pk)
 
-    def get(self, request, pk: int):
-        todo = controllers.get_todo(pk)
-        serializer = TodoSerializer(todo)
-        return Response(serializer.data)
+    if request.method == "GET":
+        return Response(TodoResponseSerializer(todo).data)
 
-    def put(self, request, pk: int):
-        todo = controllers.get_todo(pk)
-        serializer = TodoSerializer(todo, data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        data = TodoUpdateData(**serializer.validated_data)
-        updated_todo = controllers.update_todo(pk, data)
-        out_serializer = TodoSerializer(updated_todo)
-        return Response(out_serializer.data)
-
-    def patch(self, request, pk: int):
-        todo = controllers.get_todo(pk)
-        serializer = TodoSerializer(todo, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-
-        data = TodoUpdateData(**serializer.validated_data)
-        updated_todo = controllers.update_todo(pk, data)
-        out_serializer = TodoSerializer(updated_todo)
-        return Response(out_serializer.data)
-
-    def delete(self, request, pk: int):
-        controllers.delete_todo(pk)
+    if request.method == "DELETE":
+        todo.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    if request.method == "PUT":
+        update_dc = controllers.prepare_full_update(request.data)
+        updated = todo.apply_update_dataclass(update_dc)
+        return Response(TodoResponseSerializer(updated).data)
+
+    if request.method == "PATCH":
+        update_dc = controllers.prepare_partial_update(request.data)
+        updated = todo.apply_update_dataclass(update_dc)
+        return Response(TodoResponseSerializer(updated).data)
