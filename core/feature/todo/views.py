@@ -1,24 +1,30 @@
-# todo/views.py
 from .models import Todo
 from .dataclasses import TodoData
+
 
 def list_todos():
     return Todo.objects.all().order_by("-created_at")
 
+
+def get_todo(todo_id: int):
+    return Todo.objects.get(id=todo_id)
+
+
 def create_todo(todo_data: TodoData):
-    todo = Todo.objects.create(
+    return Todo.objects.create(
         title=todo_data.title,
         description=todo_data.description,
-        is_completed=todo_data.is_completed
+        is_completed=todo_data.is_completed,
     )
+
+
+def update_todo(todo: Todo, todo_data: TodoData):
+    todo.title = todo_data.title
+    todo.description = todo_data.description
+    todo.is_completed = todo_data.is_completed
+    todo.save()
     return todo
 
-def update_todo(todo_instance, todo_data: TodoData):
-    todo_instance.title = todo_data.title
-    todo_instance.description = todo_data.description
-    todo_instance.is_completed = todo_data.is_completed
-    todo_instance.save()
-    return todo_instance
 
-def delete_todo(todo_instance):
-    todo_instance.delete()
+def delete_todo(todo: Todo):
+    todo.delete()

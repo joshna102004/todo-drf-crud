@@ -1,4 +1,3 @@
-# todo/serializers/request_serializers.py
 from rest_framework import serializers
 
 class TodoRequestSerializer(serializers.Serializer):
