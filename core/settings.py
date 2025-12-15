@@ -45,9 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'core.feature.todo.apps.TodoConfig',
 
     "rest_framework",   # DRF
-    "todo",             # our app
+
 ]
 
 
