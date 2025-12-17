@@ -5,7 +5,9 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    # Todo APIs
+    path('api/todo/', include('core.feature.todo.urls')),
 
-path('api/', include('core.feature.todo.urls')),
-# All todo URLs prefixed with /api/
+    # Music APIs
+    path('api/music/', include('core.feature.music.urls')),
 ]
