@@ -11,8 +11,11 @@ from .views import (
     update_todo,
     delete_todo,
 )
-from .utils.responses import success_response, error_response
-from .utils.pagination import parse_pagination, paginate_queryset
+
+
+from core.common.utils.pagination import parse_pagination, paginate_queryset
+from core.common.utils.responses import success_response, error_response
+
 
 
 @api_view(["POST"])

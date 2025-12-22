@@ -10,4 +10,5 @@ urlpatterns = [
 
     # Music APIs
     path('api/music/', include('core.feature.music.urls')),
+    path("api/music/", include("core.feature.music.urls")),
 ]
