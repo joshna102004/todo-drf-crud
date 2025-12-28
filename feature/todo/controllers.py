@@ -13,8 +13,8 @@ from .views import (
 )
 
 
-from core.common.utils.pagination import parse_pagination, paginate_queryset
-from core.common.utils.responses import success_response, error_response
+from feature.common.utils.pagination import parse_pagination, paginate_queryset
+from feature.common.utils.responses import success_response, error_response
 
 
 

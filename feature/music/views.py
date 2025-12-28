@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from .models import Music
+from feature.music.model.models import Music
 from .dataclasses import MusicData
 
 def _to_dict(music: Music):

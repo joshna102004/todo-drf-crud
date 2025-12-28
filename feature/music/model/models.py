@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from .dataclasses import MusicData
+from feature.music.dataclasses import MusicData
 
 class Music(models.Model):
     title = models.CharField(max_length=200)
