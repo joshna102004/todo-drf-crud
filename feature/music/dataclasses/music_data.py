@@ -4,4 +4,5 @@ from dataclasses import dataclass
 class MusicData:
     title: str
     artist: str
-    duration: int  # Duration in seconds
+    genre: str = ""
+    year: int | None = None
