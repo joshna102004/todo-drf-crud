@@ -36,7 +36,7 @@ INSTALLED_APPS = [
 
     'feature.music',
     'feature.todo',
-    'feature.common',
+    'feature.artist',
 ]
 
 
