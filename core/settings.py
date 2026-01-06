@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'feature.music',
     'feature.todo',
     'feature.artist',
+    'rest_framework',
+    'drf_yasg',
 ]
 
 
