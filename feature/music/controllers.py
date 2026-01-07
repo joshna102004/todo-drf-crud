@@ -10,8 +10,16 @@ from .views import (
     update_music,
     delete_music,
 )
+
 from feature.common.utils.pagination import parse_pagination, paginate_queryset
 from feature.common.utils.responses import success_response, error_response
+from feature.common.swagger import (
+    music_list_swagger,
+    music_get_swagger,
+    music_create_swagger,
+    music_update_swagger,
+    music_delete_swagger,
+)
 
 
 class MusicController:
@@ -19,6 +27,7 @@ class MusicController:
     # -------- CREATE --------
     @staticmethod
     @api_view(["POST"])
+    @music_create_swagger(MusicRequestSerializer)
     def create(request):
         serializer = MusicRequestSerializer(data=request.data)
         if not serializer.is_valid():
@@ -43,6 +52,7 @@ class MusicController:
     # -------- LIST --------
     @staticmethod
     @api_view(["GET"])
+    @music_list_swagger()
     def list(request):
         page, page_size = parse_pagination(request)
         music_list = list_music()
@@ -59,19 +69,21 @@ class MusicController:
     # -------- GET ONE --------
     @staticmethod
     @api_view(["GET"])
-    def get_one(request, id):  # <-- accept id from URL
+    @music_get_swagger()
+    def get_one(request, id):
         result = get_music(id)
         if not result:
             return error_response(
                 message="Music not found",
                 status_code=status.HTTP_404_NOT_FOUND
             )
-        return success_response(data=result)  # <-- fixed: pass as keyword
+        return success_response(data=result)
 
     # -------- UPDATE --------
     @staticmethod
     @api_view(["PUT"])
-    def update(request, id):  # <-- accept id from URL
+    @music_update_swagger(MusicRequestSerializer)
+    def update(request, id):
         serializer = MusicRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return error_response(
@@ -100,7 +112,8 @@ class MusicController:
     # -------- DELETE --------
     @staticmethod
     @api_view(["DELETE"])
-    def delete(request, id):  # <-- accept id from URL
+    @music_delete_swagger()
+    def delete(request, id):
         success = delete_music(id)
         if not success:
             return error_response(
